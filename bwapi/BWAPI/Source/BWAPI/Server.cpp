@@ -175,7 +175,9 @@ namespace BWAPI
     data->shapeCount       = 0;
     if (gameTable && gameTableIndex >= 0)
     {
-      gameTable->gameInstances[gameTableIndex].lastKeepAliveTime = 0;
+      struct timespec ts;
+      if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
+        gameTable->gameInstances[gameTableIndex].lastKeepAliveTime = ts.tv_sec;
       gameTable->gameInstances[gameTableIndex].isConnected = connected;
     }
     if (connected)
