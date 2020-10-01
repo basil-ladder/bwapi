@@ -22,6 +22,11 @@ int main() {
       BWAPI::BroodwarImpl_handle h(gameOwner.getGame());
 
       do {
+        // Allow client bots to connect/ load AI module
+        while (!h->server.isConnected())
+        {
+          h->server.update();
+        }
         h->autoMenuManager.startGame();
 
         while (!h->bwgame.gameOver()) {
