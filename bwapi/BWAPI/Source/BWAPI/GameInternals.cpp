@@ -11,7 +11,7 @@
 #include <BWAPI/RegionImpl.h>
 #include "Command.h"
 
-#include "../../../Debug.h"
+#include <Debug.h>
 
 #include "BW/BWData.h"
 
@@ -379,9 +379,6 @@ namespace BWAPI
     flags.fill(false);
 
     // Clear the latency buffer
-    for(unsigned int j = 0; j < this->commandBuffer.size(); ++j)
-      for (unsigned int i = 0; i < this->commandBuffer[j].size(); ++i)
-        delete this->commandBuffer[j][i];
     this->commandBuffer.clear();
     this->commandBuffer.reserve(16);
 
@@ -399,7 +396,7 @@ namespace BWAPI
     this->regionMap.clear();
 
     // Reset game speeds and text size
-    this->setLocalSpeedDirect(this->speedOverride);
+    this->setLocalSpeedDirect(std::numeric_limits<int>::min());
     this->setFrameSkip(1);
     this->setTextSize();
     this->setGUI(true);

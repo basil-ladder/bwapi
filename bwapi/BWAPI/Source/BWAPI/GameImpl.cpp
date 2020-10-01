@@ -1,4 +1,4 @@
-#include "../../../svnrev.h"
+#include "../../svnrev.h"
 #include "GameImpl.h"
 
 #include <cstdio>
@@ -31,7 +31,7 @@
 #include "../Config.h"
 #include "BWtoBWAPI.h"
 
-#include "../../../Debug.h"
+#include <Debug.h>
 
 namespace BWAPI
 {
@@ -883,6 +883,10 @@ namespace BWAPI
   {
     return this->lastEventTime;
   }
+  void GameImpl::setLastEventTime(int lastEventTime)
+  {
+    this->lastEventTime = lastEventTime;
+  }
   bool GameImpl::setRevealAll(bool reveal)
   {
     if ( !isReplay() )
@@ -1211,9 +1215,6 @@ namespace BWAPI
     frameCount = s.frameCount;
     flags = s.flags;
 
-    for(unsigned int j = 0; j < this->commandBuffer.size(); ++j)
-      for (unsigned int i = 0; i < this->commandBuffer[j].size(); ++i)
-        delete this->commandBuffer[j][i];
     this->commandBuffer.clear();
     this->commandBuffer.reserve(16);
 

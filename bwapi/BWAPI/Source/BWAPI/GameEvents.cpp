@@ -8,8 +8,7 @@
 #include <BWAPI/PlayerImpl.h>
 #include <BWAPI/RegionImpl.h>
 
-#include "../../../svnrev.h"
-#include "../../../Debug.h"
+#include <Debug.h>
 
 #include <chrono>
 #include <codecvt>
@@ -30,6 +29,9 @@ namespace BWAPI
   {
     // This function is called at the start of every match
     this->initializeData();
+
+    // Set the speed override
+    this->setLocalSpeedDirect(this->speedOverride);
 
     // initialize the variables
     //this->frameCount      = 0;
@@ -265,14 +267,14 @@ namespace BWAPI
   {
     if ( text.empty() ) return;
 
-    if ( !parseText(text) && isFlagEnabled(BWAPI::Flag::UserInput) )
+    if ( !parseText(text) )
     {
       if ( externalModuleConnected )
       {
         events.push_back(Event::SendText());
         events.back().setText(text.c_str());
       }
-      else
+      else if( isFlagEnabled(BWAPI::Flag::UserInput) )
         sendText("%s", text.c_str());
     }
   }

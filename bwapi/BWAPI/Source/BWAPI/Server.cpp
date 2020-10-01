@@ -17,9 +17,9 @@
 #include <BW/BWData.h>
 
 #include "../Config.h"
-#include "../../../svnrev.h"
+#include "../../svnrev.h"
 
-#include "../../../Debug.h"
+#include <Debug.h>
 
 namespace BWAPI
 {
@@ -72,7 +72,9 @@ namespace BWAPI
     {
       // Update BWAPI Client
       updateSharedMemory();
+      //      auto const onFrameStart = GetTickCount();
       callOnFrame();
+      //      BroodwarImpl.setLastEventTime(GetTickCount() - onFrameStart);
       processCommands();
     }
     else
@@ -263,6 +265,7 @@ namespace BWAPI
       p->type = i->getType();
       p->force = getForceID(i->getForce());
       p->color = p2->color;
+      p->isParticipating = p2->isParticipating;
 
       for(int j = 0; j < 12; ++j)
       {

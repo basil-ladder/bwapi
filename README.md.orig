@@ -1,0 +1,220 @@
+<<<<<<< HEAD
+# BWAPI for OpenBW
+
+This is a fork of BWAPI which allows the use of OpenBW as a backend for BWAPI.
+The BWAPI version is 4.2.0.
+
+This fork has significant changes and it no longer works with regular StarCraft: Brood War. Support for OpenBW should eventually be merged into the official BWAPI, but this fork will exist until then.
+
+This is a development version, and breaking changes can occur at any time (that goes for OpenBW itself too).
+
+### build & install
+
+Clone the openbw/openbw and openbw/bwapi repositories.
+OpenBW does not (yet) need to be built seperately (it will be built as part of the BWAPI build process).
+BWAPI can be built with CMake.
+
+The OPENBW_DIR cmake variable need to be set to the path of the openbw code.
+
+On linux, the following commands would work.
+```
+git clone https://github.com/openbw/openbw
+git clone https://github.com/openbw/bwapi
+cd bwapi
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DOPENBW_DIR=../../openbw -DOPENBW_ENABLE_UI=1
+make
+```
+`make install` would probably install BWAPI into /usr/local. This can be changed with the CMAKE_INSTALL_PREFIX variable, eg `cmake .. -DCMAKE_BUILD_TYPE=Release -DOPENBW_DIR=../../openbw -DCMAKE_INSTALL_PREFIX=/home/username/bwapi`.
+
+I probably recommend just using it from the build folder, for now.
+
+If you are using Visual Studio, then Visual Studio 2017 will most likely be required.
+Generate Visual Studio project files with CMake, do not any existing project files from the source tree.
+
+By default, OpenBW will be built with no support for a graphical user interface, however it can be enabled with the OPENBW_ENABLE_UI cmake option (like above).
+If this option is enabled, then SDL2 must also be available.
+The UI can be disabled either by setting environment variable OPENBW_ENABLE_UI=0 or calling Broodwar->setGUI(false).
+
+## Compiling/linking your bot
+
+If you installed, BWAPI.h (and the rest) will be in the include folder, otherwise they're found in bwapi/bwapi/include in the source tree.
+
+On Windows, you should link to BWAPILIB.lib (not BWAPI.lib, this is different from regular BWAPI).
+
+On Linux, you don't really need to link to anything, but you can -lBWAPILIB if you want.
+
+### Running
+
+The main executable is BWAPILauncher. Running BWAPILauncher is the functional equivalent of starting StarCraft & BWAPI via an injector on Windows.
+
+OpenBW needs the usual 3 mpq files in the working directory when it starts (Stardat.mpq, Broodat.mpq and Patch_rt.mpq).
+These can be copied from StarCraft: BroodWar 1.16.1 or 1.18, or you can just start BWAPILauncher from the StarCraft directory.
+
+BWAPI loads its configuration from bwapi-data/bwapi.ini as usual. See https://github.com/bwapi/bwapi/wiki/Configuration.
+
+the image below outlines the directory structure and required files to run OpenBW:
+
+![directory structure](https://i.imgur.com/c2nE4Go.png)
+
+OpenBW has no built-in computer player, so in single player games the opponent does not peform any actions.
+
+Keep in mind that BWAPI configuration settings can be set through environment variables, so one can for instance run
+```
+BWAPI_CONFIG_AI__AI=/path/to/my/bot.so BWAPI_CONFIG_AUTO_MENU__RACE=Zerg BWAPILauncher
+```
+
+In general BWAPILauncher has no console output unless there is an error.
+
+### Multiplayer
+
+Multiplayer games are supported, but playing together with StarCraft: Brood War clients is currently not possible.
+
+Only 1v1 games are supported. More than two clients can not connect together.
+
+The map (in bwapi.ini) must be the same on both clients, otherwise each player will load a different map and things will break.
+
+Multiplayer is enabled as usual by setting auto_menu=LAN in bwapi.ini (or through environment variable), but the lan_mode setting is not used.
+Instead, the OPENBW_LAN_MODE environment variable is read.
+
+The possible settings for `OPENBW_LAN_MODE` is `TCP`, `LOCAL`, `LOCAL_AUTO`, `FILE` or `FD`. On Windows only TCP is supported, though :)
+
+The default is LOCAL_AUTO (except on Windows, where it is TCP)
+
+
+The variables mentioned below are environment variables.
+#### TCP
+Uses TCP/IP for networking. By default it will bind to 0.0.0.0 and listen on port 6112, and connect to 127.0.0.1 on the same port.
+
+`OPENBW_TCP_LISTEN_HOSTNAME` and `OPENBW_TCP_LISTEN_PORT` can be set to change the interface and port that it listens on.
+`OPENBW_TCP_CONNECT_HOSTNAME` and `OPENBW_TCP_CONNECT_PORT` can be set to change the hostname and port that it tries to connect to.
+
+There are no errors if it fails to bind or connect.
+
+#### LOCAL
+Uses local sockets for interprocess communication. 
+
+`OPENBW_LOCAL_PATH` - the path to the socket file to use. If it exists, then it attempts to connect, otherwise it will create the file and listen on it.
+One of the clients has to listen, so when starting two clients, the file should not already exist.
+
+#### LOCAL_AUTO
+Listens on a unique socket file in /tmp/openbw and tries to connect to other sockets in that directory. It will automatically remove any unused sockets.
+
+`OPENBW_LOCAL_AUTO_DIRECTORY` can be used to change the directory that it uses.
+
+#### FILE
+`OPENBW_FILE_READ` is the file to read from, and `OPENBW_FILE_WRITE` is the file to write to. The files should be pipe (FIFO) files or something like that.
+
+#### FD
+Same as FILE, but `OPENBW_FD_READ` and `OPENBW_FD_WRITE` can be used to specify file descriptors instead of file paths.
+
+=======
+# The Brood War API {#BWAPI}
+
+[![Build status](https://ci.appveyor.com/api/projects/status/6eikd5g49co6l5ty/branch/develop?svg=true)](https://ci.appveyor.com/project/heinermann/bwapi/branch/develop)
+
+[TOC]
+
+@htmlinclude twitter_widget
+
+# Project Information {#project}
+
+## Overview {#overview}
+
+The Brood War Application Programming Interface (BWAPI) is a free and open source C++ framework that is
+used to interact with the popular Real Time Strategy (RTS) game Starcraft: Broodwar. Using BWAPI,
+students, researchers, and hobbyists can create Artificial Intelligence (AI) agents that play the game.
+
+BWAPI only reveals the visible parts of the game state to AI modules by default. Information on units
+that have gone back into the fog of war is denied to the AI. This enables programmers to write competitive
+non-cheating AIs that must plan and operate under partial information conditions. BWAPI also denies
+user input by default, ensuring the user cannot take control of game units while the AI is playing.
+These defaults can be changed for flexibility, unless enforced by a Tournament Module (game referee for
+AI tournaments). Changed defaults will be advertised when the match begins.
+
+
+## Capabilities {#capability}
+
+ - Write competitive AIs for Starcraft: Broodwar by controlling individual units.
+ - Read all relevant aspects of the game state.
+ - Analyze replays frame-by-frame, and extract trends, build orders, and common strategies.
+ - Get comprehensive information on the unit types, upgrades, technologies, weapons, and more.
+ - Study and research real-time AI algorithms in a robust commercial RTS environment.
+
+ 
+## Getting Started {#getting-started}
+ - Developing a bot in C++? Then download the [latest release](https://github.com/bwapi/bwapi/releases).
+ - If you would like to develop a bot in Java, please follow [this tutorial](http://sscaitournament.com/index.php?action=tutorial).
+ - Want to help improve BWAPI? Fork the [`develop` branch](https://github.com/bwapi/bwapi/tree/develop).
+
+## Quick Start {#quick-start}
+1. Installation
+   1. Install **Visual Studio 2013**
+   2. Install **StarCraft: Brood War**
+   3. Update **StarCraft: Brood War** to `1.16.1`
+   4. Install **BWAPI**
+2. Compile
+   1. Open `ExampleProjects.sln` in the BWAPI install directory
+   2. Build the ExampleAIModule project in RELEASE mode
+   3. Copy `ExampleAIModule.dll` to `bwapi-data/AI` inside the StarCraft install folder
+3. Run StarCraft through Chaoslauncher
+   1. Run `Chaoslauncher.exe` as administrator
+      - Chaoslauncher is found in Chaoslauncher directory of BWAPI install directory
+   3. Check the *BWAPI Injector x.x.x [RELEASE]*
+   4. Click Start
+      - Make sure the version is set to Starcraft 1.16.1, not ICCup 1.16.1
+4. Run a game against Blizzard's AI
+   1. Go to **Single Player** -> **Expansion**
+   2. Select any user and click **OK**
+   3. Click **Play Custom**, select a map, and start a game
+5. Run a game against yourself
+   1. Run `Chaoslauncher - MultiInstance.exe` as administrator
+   2. Start
+      1. Go to **Multiplayer** -> **Expansion** -> **Local PC**
+      2. Select any user and click **OK**
+      3. Click **Create Game**, select a map, and click **OK**
+   3. Start -- Uncheck *BWAPI Injector x.x.x [RELEASE]* to let a human play, leave alone to make AI play itself
+      1. Go to **Multiplayer** -> **Expansion** -> **Local PC**
+      2. Select any user and click **OK**
+      3. Join the existing game created by the other client
+ 
+## Important Links & Contact Information {#contact}
+* **Documentation:**         http://bwapi.github.io/
+* **Repository:**            https://github.com/bwapi/bwapi
+* **Issue Tracker:**         https://github.com/bwapi/bwapi/issues
+* **Releases:**              https://github.com/bwapi/bwapi/releases
+* **SSCAIT Discord:**        https://discord.gg/DqvHsq9
+* **IRC Channel:**           http://webchat.freenode.net/?channels=BWAPI
+* **Facebook:**              https://www.facebook.com/groups/bwapi/
+* **Links to competitions, bots, etc. :**    https://github.com/bwapi/bwapi/wiki/Useful-Links
+
+
+## Competitions {#competition}
+Various venues host remote competitive AI competitions that allow developers from around the world to participate. These venues are often held annually and will sometimes offer prizes to the winners. It is also a great way to test your bot's capabilities.
+* [AAAI Conference on Artificial Intelligence and Interactive Digital Entertainment (AIIDE)](http://www.starcraftaicompetition.com)
+* [IEEE Conference on Computational Intelligence and Games (CIG)](http://cilab.sejong.ac.kr/sc_competition/)
+* [Student StarCraft AI (SSCAI) Tournament](http://sscaitournament.com/)
+* [BWAPI Bots Ladder](http://bots-stats.krasi0.com)
+
+
+## Issues {#issues}
+You may experience issues when working with BWAPI. Here are some steps you may want to follow in order to resolve them.
+1. Check the log files found in `Starcraft/Errors/`.
+2. Ask in the IRC channel if anyone has experienced your issue before.
+3. Check the Issue Tracker to see if your issue has already been reported.
+4. Submit an issue to the Issue Tracker. Some pieces of information to consider submitting are
+  * Log files
+  * Screenshots
+  * Version or revision number
+  * Operating System
+  * **Steps to reproduce the problem**
+
+[Go to the Issue tracker](https://github.com/bwapi/bwapi/issues)
+
+
+## Legal {#legal}
+[Starcraft](http://www.blizzard.com/games/sc/) and [Starcraft: Broodwar](http://www.blizzard.com/games/sc/) are trademarks of
+[Blizzard Entertainment](http://www.blizzard.com). BWAPI is a third party "hack" that violates the End User License Agreement (EULA).
+It is strongly recommended to purchase a legitimate copy of Starcraft: Broodwar from Blizzard Entertainment before using BWAPI.
+>>>>>>> 7687da8abc4726f8366401f11ab648d421385793

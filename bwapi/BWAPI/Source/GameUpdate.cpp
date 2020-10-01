@@ -9,8 +9,8 @@
 #include <BW/Constants.h>
 #include <BW/OrderTypes.h>
 
-#include "../../../svnrev.h"
-#include "../../../Debug.h"
+#include "../../svnrev.h"
+#include <Debug.h>
 
 #ifdef _WIN32
 #include <windows.h>

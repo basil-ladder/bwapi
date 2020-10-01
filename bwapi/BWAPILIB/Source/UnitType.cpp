@@ -10,7 +10,7 @@
 #include <BWAPI/UpgradeType.h>
 #include <BWAPI/Race.h>
 
-#include "../../Debug.h"
+#include <Debug.h>
 
 template class std::allocator<BWAPI::UnitType>;
 

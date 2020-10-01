@@ -6,7 +6,7 @@
 #include <BWAPI/Order.h>
 #include <cassert>
 
-#include "../../../Debug.h"
+#include <Debug.h>
 
 namespace BWAPI
 {
@@ -264,6 +264,7 @@ namespace BWAPI
     {
       UnitImpl *u = static_cast<UnitImpl*>(ui);
       UnitImpl* orderTargetUnit = getUnitFromBWUnit(u->bwunit.orderTarget_pUnit());
+      UnitImpl *buildUnit = getUnitFromBWUnit(u->bwunit.currentBuildUnit());
       if ( orderTargetUnit && orderTargetUnit->exists() && u->getOrder() == Orders::ConstructingBuilding )
       {
         UnitImpl* j             = orderTargetUnit;
@@ -283,6 +284,15 @@ namespace BWAPI
         u->self->isConstructing = true;
         u->self->isIdle         = false;
         u->self->buildType      = j->self->type;
+        j->self->buildUnit      = server.getUnitID(u);
+        j->self->isConstructing = true;
+        j->self->isIdle         = false;
+        j->self->buildType      = j->self->type;
+      }
+      else if ( buildUnit && buildUnit->exists() && u->isTraining() )
+      {
+        // Apply buildUnit symmetry
+        UnitImpl* j             = buildUnit;
         j->self->buildUnit      = server.getUnitID(u);
         j->self->isConstructing = true;
         j->self->isIdle         = false;

@@ -2,6 +2,7 @@
 *.sdf
 *.opensdf
 */svnrev.h
+*/include/svnrev.h
 *.suo
 *.log
 *.ncb
@@ -9,6 +10,8 @@ Debug
 Release
 Release_Pipeline
 Debug_Pipeline
+Release_NoCopy
+Debug_NoCopy
 *.swp
 *.bak
 cppcheck.xml
@@ -39,3 +42,5 @@ apps/cygwin/
 apps/http*
 BWAPI.7z
 
+
+build

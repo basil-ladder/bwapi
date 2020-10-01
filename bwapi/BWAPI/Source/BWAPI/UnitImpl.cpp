@@ -13,7 +13,7 @@
 #include <BW/BWData.h>
 #include <BW/OrderTypes.h>
 
-#include "../../../Debug.h"
+#include <Debug.h>
 
 namespace BWAPI
 {
@@ -78,7 +78,7 @@ namespace BWAPI
     }
 
     // Add to command optimizer if possible, as well as the latency compensation buffer
-    BroodwarImpl.addToCommandBuffer(new Command(command));
+    BroodwarImpl.addToCommandBuffer(Command{ command });
     return BroodwarImpl.commandOptimizer.add(command);
   }
   bool UnitImpl::issueCommand(UnitCommand command)

@@ -252,7 +252,7 @@ namespace BWAPI
         for (BWAPI::Unit m : Broodwar->getStaticMinerals())
         {
           TilePosition tp = m->getInitialTilePosition();
-          if ( (Broodwar->isVisible(tp) || Broodwar->isVisible(tp.x + 1, tp.y)) && !m->isVisible() )
+          if ( (Broodwar->isVisible(tp) || Broodwar->isVisible(tp.x + 1, tp.y)) && !m->exists() )
               continue; // tile position is visible, but mineral is not => mineral does not exist
           if (tp.x > lt.x - 5 &&
               tp.y > lt.y - 4 &&
@@ -466,6 +466,8 @@ namespace BWAPI
     {
       if ( !targetUnit || !targetUnit->exists() )
         return Broodwar->setLastError(Errors::Unit_Does_Not_Exist);
+      if ( !targetUnit->isVisible() && !Broodwar->isFlagEnabled(Flag::CompleteMapInformation) )
+        return false;
       if ( !targetUnit->isCompleted() &&
            !targetUnit->getType().isBuilding() &&
            !targetUnit->isMorphing() &&

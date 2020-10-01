@@ -1,6 +1,6 @@
 #include "PositionUnitTarget.h"
 
-#include "../../../Debug.h"
+#include <Debug.h>
 
 #include <BWAPI/GameImpl.h>
 

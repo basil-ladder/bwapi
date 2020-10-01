@@ -5,7 +5,7 @@
 #include <Util/Clamp.h>
 #include <Util/Convenience.h>
 
-#include "../../../Debug.h"
+#include <Debug.h>
 
 namespace BWAPI
 {

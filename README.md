@@ -43,6 +43,7 @@ If you installed, BWAPI.h (and the rest) will be in the include folder, otherwis
 On Windows, you should link to BWAPILIB.lib (not BWAPI.lib, this is different from regular BWAPI).
 
 On Linux, you don't really need to link to anything, but you can -lBWAPILIB if you want.
+* **SSCAIT Discord:**        https://discord.gg/DqvHsq9
 
 ### Running
 

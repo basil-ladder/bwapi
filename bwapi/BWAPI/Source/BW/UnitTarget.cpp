@@ -3,7 +3,7 @@
 #include <BWAPI/UnitImpl.h>
 #include <BWAPI/GameImpl.h>
 
-#include "../../../Debug.h"
+#include <Debug.h>
 
 namespace BW
 {
