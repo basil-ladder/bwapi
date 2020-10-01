@@ -50,6 +50,11 @@ namespace BWAPI
     void processCommands();
     void setWaitForResponse(bool wait);
 
+    int syncSocket = -1;
+    std::string shareName;
+    int mapFileHandle = 0;
+    int gameTableFileHandle = 0;
+
     GameTable* gameTable = nullptr;
     int gameTableIndex = -1;
     bool connected = false;
@@ -65,4 +70,4 @@ namespace BWAPI
     std::unordered_map<Unit, int> unitLookup;
 
   };
-}
+} // namespace BWAPI
