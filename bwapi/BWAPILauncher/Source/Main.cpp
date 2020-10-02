@@ -27,6 +27,8 @@ int main() {
         {
           h->server.update();
         }
+        // Allow server to update the game table
+        h->server.update();
         h->autoMenuManager.startGame();
 
         while (!h->bwgame.gameOver()) {
