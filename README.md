@@ -1,7 +1,7 @@
 # BWAPI for OpenBW
 
 This is a fork of BWAPI which allows the use of OpenBW as a backend for BWAPI.
-The BWAPI version is 4.2.0.
+The BWAPI version is 4.4.0.
 
 This fork has significant changes and it no longer works with regular StarCraft: Brood War. Support for OpenBW should eventually be merged into the official BWAPI, but this fork will exist until then.
 
