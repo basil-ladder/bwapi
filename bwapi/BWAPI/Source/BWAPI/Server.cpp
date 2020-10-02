@@ -90,7 +90,7 @@ namespace BWAPI
               {
                 oldest = gameTable->gameInstances[i].lastKeepAliveTime;
                 gameTableIndex = i;
-              }
+                }
             }
           }
           //We have a game table index now, initialize our row
@@ -162,6 +162,7 @@ namespace BWAPI
       munmap(gameTable, sizeof(GameTable));
       close(syncSocket);
       shm_unlink(shareName.c_str());
+      shm_unlink("/bwapi_shared_memory_game_list");
 #endif
     }
   }

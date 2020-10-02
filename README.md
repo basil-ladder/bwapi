@@ -1,7 +1,7 @@
 # BWAPI for OpenBW
 
 This is a fork of BWAPI which allows the use of OpenBW as a backend for BWAPI.
-The BWAPI version is 4.2.0.
+The BWAPI version is 4.4.0.
 
 This fork has significant changes and it no longer works with regular StarCraft: Brood War. Support for OpenBW should eventually be merged into the official BWAPI, but this fork will exist until then.
 
@@ -45,7 +45,11 @@ On Windows, you should link to BWAPILIB.lib (not BWAPI.lib, this is different fr
 On Linux, you don't really need to link to anything, but you can -lBWAPILIB if you want.
 * **SSCAIT Discord:**        https://discord.gg/DqvHsq9
 
-### Running
+## Using a client bot
+
+Currently, only [JBWAPI](https://github.com/JavaBWAPI/JBWAPI/tree/linux_client) bots are supported. The C++ client is WIP.
+
+## Running
 
 The main executable is BWAPILauncher. Running BWAPILauncher is the functional equivalent of starting StarCraft & BWAPI via an injector on Windows.
 
