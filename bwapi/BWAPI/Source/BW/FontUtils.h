@@ -8,7 +8,10 @@ namespace BW {
   namespace FontUtils {
     inline int getCharWidth(uint8_t c, uint8_t bSize) {
       if(c=='\t') return 12*bSize;
-      if(c==' ') return 6*bSize;
+      if (c < ' ')
+        return 0;
+      if (c == ' ')
+        return 3 * bSize;
       return 6*bSize;
     }
 

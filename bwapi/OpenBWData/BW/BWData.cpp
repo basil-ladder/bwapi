@@ -159,6 +159,7 @@ struct ui_wrapper {
   ui_thread_t ui_thread;
   bool exit_thread = false;
   bool run_update = false;
+  bool is_paused = false;
   std::mutex mut;
   std::condition_variable cv;
   int game_speed = 0;
@@ -174,9 +175,10 @@ struct ui_wrapper {
     player.set_st(st);
     return player;
   }
-  ui_wrapper(bwgame::state& st, std::string mpq_path) {
+  ui_wrapper(bwgame::state &st, std::string mpq_path, size_t s_width, size_t s_height)
+  {
 
-    ui_thread = ui_thread_t([this, player = get_player(st), mpq_path]() mutable {
+    ui_thread = ui_thread_t([this, player = get_player(st), mpq_path, s_width, s_height]() mutable {
       std::unique_lock<std::mutex> l(mut);
       ui_functions ui(std::move(player));
 
@@ -188,8 +190,8 @@ struct ui_wrapper {
       };
       ui.init();
 
-      size_t screen_width = 800;
-      size_t screen_height = 600;
+      size_t screen_width = s_width;
+      size_t screen_height = s_height;
 
       ui.resize(screen_width, screen_height);
       ui.screen_pos = {(int)ui.game_st.map_width / 2 - (int)screen_width / 2, (int)ui.game_st.map_height / 2 - (int)screen_height / 2};
@@ -204,18 +206,20 @@ struct ui_wrapper {
         this->on_draw(data, data_pitch);
       };
 
-      while (!exit_thread) {
+      while (!exit_thread)
+      {
         cv.wait_for(l, std::chrono::milliseconds(42), [&]{
           return run_update || exit_thread;
         });
         run_update = false;
 
         last_update = clock.now();
+        ui.screen_pos = {screen_pos_x, screen_pos_y};
         ui.update();
         window_closed = ui.window_closed;
+        is_paused = ui.is_paused;
       }
     });
-
   }
   ~ui_wrapper() {
     exit_thread = true;
@@ -252,6 +256,10 @@ struct ui_wrapper {
   }
   uint8_t* screen_buffer() {
     return m_screen_buffer;
+  }
+  bool paused()
+  {
+    return is_paused;
   }
 };
 
@@ -313,6 +321,10 @@ struct ui_wrapper {
   }
   uint8_t* screen_buffer() {
     return nullptr;
+  }
+  bool paused()
+  {
+    return false;
   }
 };
 struct draw_ui_wrapper {
@@ -824,18 +836,29 @@ struct openbwapi_impl {
 
   void next_frame() {
     if (!ui && ui_enabled) {
-      ui = std::make_unique<ui_wrapper>(st, game_setup_helper.env("OPENBW_MPQ_PATH", "."));
+      ui = std::make_unique<ui_wrapper>(st, game_setup_helper.env("OPENBW_MPQ_PATH", "."),
+                                        std::stoi(game_setup_helper.env("OPENBW_SCREEN_WIDTH", "1280")),
+                                        std::stoi(game_setup_helper.env("OPENBW_SCREEN_HEIGHT", "720")));
     }
     if (ui) {
-      auto l = ui->get_lock();
-      if (vars.is_replay) {
-        if (replay_funcs.is_done()) {
-          game_setup_helper.leave_game();
-        } else {
-          replay_funcs.next_frame();
+      if (!ui->paused())
+      {
+        auto l = ui->get_lock();
+        if (vars.is_replay)
+        {
+          if (replay_funcs.is_done())
+          {
+            game_setup_helper.leave_game();
+          }
+          else
+          {
+            replay_funcs.next_frame();
+          }
         }
-      } else {
-        game_setup_helper.next_frame();
+        else
+        {
+          game_setup_helper.next_frame();
+        }
       }
     } else {
       if (vars.is_replay) {
@@ -1074,7 +1097,10 @@ int Game::screenHeight() const
 
 void Game::setScreenPosition(int x, int y)
 {
-
+  if (!impl->ui)
+    return;
+  impl->ui->screen_pos_x = x;
+  impl->ui->screen_pos_y = y;
 }
 
 int Game::NetMode() const
@@ -1084,7 +1110,7 @@ int Game::NetMode() const
 
 bool Game::isGamePaused() const
 {
-  return false;
+  return impl->ui && impl->ui->paused();
 }
 
 bool Game::InReplay() const
