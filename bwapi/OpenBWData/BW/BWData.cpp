@@ -1641,7 +1641,35 @@ void Game::setCustomActionCallback(std::function<void(int, const char* data, siz
 
 int Player::playerColorIndex() const
 {
-  return impl->funcs.st.players.at(owner).color;
+  switch (impl->funcs.st.players.at(owner).color)
+  {
+  case 0:
+    return 111;
+  case 1:
+    return 165;
+  case 2:
+    return 159;
+  case 3:
+    return 164;
+  case 4:
+    return 156;
+  case 5:
+    return 19;
+  case 6:
+    return 255;
+  case 7:
+    return 135;
+  case 8:
+    return 117;
+  case 9:
+  // Pale yellow
+  case 10:
+  // Tan
+  case 11:
+    //Azure
+  default:
+    return 0;
+  }
 }
 
 const char* Player::szName() const
