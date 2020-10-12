@@ -169,6 +169,7 @@ struct ui_wrapper {
   int screen_height = 0;
   int screen_pos_x = 0;
   int screen_pos_y = 0;
+  u32 vision = 255;
   std::function<void(uint8_t*, size_t)> on_draw;
   bwgame::game_player get_player(bwgame::state& st) {
     bwgame::game_player player;
@@ -215,6 +216,7 @@ struct ui_wrapper {
 
         last_update = clock.now();
         ui.screen_pos = {screen_pos_x, screen_pos_y};
+        ui.vision = vision;
         ui.update();
         window_closed = ui.window_closed;
         is_paused = ui.is_paused;
@@ -297,6 +299,7 @@ struct draw_ui_wrapper {
 
 #else
 struct ui_wrapper {
+  u32 vision = 255;
   ui_wrapper(bwgame::state& st, std::string mpq_path) {}
   void update() {}
   bool closed() {
@@ -1136,12 +1139,13 @@ bool Game::gameClosed() const
 
 u32 Game::ReplayVision() const
 {
-  throw std::runtime_error("ReplayVision");
+  return impl->ui ? impl->ui->vision : 255;
 }
 
-void Game::setReplayVision(u32)
+void Game::setReplayVision(u32 vision)
 {
-  throw std::runtime_error("setReplayVision");
+  if (impl->ui)
+    impl->ui->vision = vision;
 }
 
 void Game::setGameSpeedModifiers(int n, int value)
