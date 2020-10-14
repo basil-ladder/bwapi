@@ -169,7 +169,7 @@ struct ui_wrapper {
   int screen_height = 0;
   int screen_pos_x = 0;
   int screen_pos_y = 0;
-  u32 vision = 255;
+  u32 vision = 0;
   std::function<void(uint8_t*, size_t)> on_draw;
   bwgame::game_player get_player(bwgame::state& st) {
     bwgame::game_player player;
@@ -299,7 +299,7 @@ struct draw_ui_wrapper {
 
 #else
 struct ui_wrapper {
-  u32 vision = 255;
+  u32 vision = 0;
   ui_wrapper(bwgame::state& st, std::string mpq_path) {}
   void update() {}
   bool closed() {
