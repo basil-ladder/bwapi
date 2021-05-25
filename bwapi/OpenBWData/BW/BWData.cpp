@@ -171,6 +171,7 @@ struct ui_wrapper {
   int screen_pos_y = 0;
   u32 vision = 0;
   std::function<void(uint8_t*, size_t)> on_draw;
+  std::function<void (int, bwgame::xy, const bwgame::unit_t*,bool)> on_play_sound;
   bwgame::game_player get_player(bwgame::state& st) {
     bwgame::game_player player;
     player.set_st(st);
@@ -190,6 +191,7 @@ struct ui_wrapper {
         load_data_file(data, std::move(filename));
       };
       ui.init();
+      ui.global_volume = 100;
 
       size_t screen_width = s_width;
       size_t screen_height = s_height;
@@ -205,6 +207,10 @@ struct ui_wrapper {
         this->screen_pos_x = ui.screen_pos.x;
         this->screen_pos_y = ui.screen_pos.y;
         this->on_draw(data, data_pitch);
+      };
+
+      on_play_sound = [this, &ui](int id, bwgame::xy position, const bwgame::unit_t* source_unit, bool add_race_index) {
+	      ui.play_sound(id, position, source_unit, add_race_index);
       };
 
       while (!exit_thread)
@@ -239,6 +245,10 @@ struct ui_wrapper {
   }
   auto get_lock() {
     return std::unique_lock<std::mutex>(mut);
+  }
+
+  void play_sound(int id, bwgame::xy position, const bwgame::unit_t* source_unit, bool add_race_index) {
+	  if (on_play_sound) on_play_sound(id, position, source_unit, add_race_index);
   }
 
   void set_on_draw(std::function<void(uint8_t*, size_t)> f) {
@@ -300,7 +310,9 @@ struct draw_ui_wrapper {
 #else
 struct ui_wrapper {
   u32 vision = 0;
-  ui_wrapper(bwgame::state& st, std::string mpq_path) {}
+  int screen_pos_x = 0;
+  int screen_pos_y = 0;
+  ui_wrapper(bwgame::state &st, std::string mpq_path, size_t s_width, size_t s_height) {}
   void update() {}
   bool closed() {
     return false;
@@ -792,11 +804,22 @@ struct openbwapi_functions: F {
 
 };
 
+struct replay_functions : bwgame::replay_functions {
+	std::function<void (int, bwgame::xy, const bwgame::unit_t*,bool)> on_play_sound;
+
+	explicit replay_functions(bwgame::state& st, bwgame::action_state& action_st, bwgame::replay_state& replay_st) : bwgame::replay_functions(st, action_st, replay_st) {
+	}
+
+	virtual void play_sound(int id, bwgame::xy position, const bwgame::unit_t* source_unit, bool add_race_index) override {
+		if (on_play_sound) on_play_sound(id, position, source_unit, add_race_index);
+	}
+};
+
 struct openbwapi_impl {
   game_vars& vars;
   bwgame::state& st;
   openbwapi_functions<bwgame::state_functions> funcs;
-  openbwapi_functions<bwgame::replay_functions> replay_funcs;
+  openbwapi_functions<replay_functions> replay_funcs;
   openbwapi_functions<bwgame::sync_functions> sync_funcs;
   game_setup_helper_t game_setup_helper{st, vars, replay_funcs, sync_funcs};
   std::function<void(const char*)> print_text_callback;
@@ -842,6 +865,9 @@ struct openbwapi_impl {
       ui = std::make_unique<ui_wrapper>(st, game_setup_helper.env("OPENBW_MPQ_PATH", "."),
                                         std::stoi(game_setup_helper.env("OPENBW_SCREEN_WIDTH", "1280")),
                                         std::stoi(game_setup_helper.env("OPENBW_SCREEN_HEIGHT", "720")));
+      replay_funcs.on_play_sound = [this](int id, bwgame::xy position, const bwgame::unit_t* source_unit, bool add_race_index) {
+	      this->ui->play_sound(id, position, source_unit, add_race_index);
+      };
     }
     if (ui) {
       if (!ui->paused())
