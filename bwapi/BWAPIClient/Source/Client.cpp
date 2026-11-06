@@ -1,6 +1,7 @@
 #include <BWAPI/Client/Client.h>
 #include <stdexcept>
 #include <iostream>
+#include <cstring>
 
 #ifndef _WIN32
 #include <sys/mman.h>
