@@ -37,7 +37,7 @@ namespace BWAPI
       auto orderEvent = makeEvent(EventType::Order);
       auto finishEvent = makeEvent(EventType::Finish);
 
-      switch (command.type) {
+      switch ((UnitCommandType) command.type) {
         // RLF: Resource event
         // RLF + 1: Order event
         // RLF + 2: Finish event
@@ -131,7 +131,7 @@ namespace BWAPI
   template <class UnitImpl, class PlayerImpl>
   void CommandTemp<UnitImpl, PlayerImpl>::execute()
   {
-    switch(command.type)
+    switch((UnitCommandType) command.type)
     {
     case UnitCommandTypes::Halt_Construction:
       eventType = EventType::Order;
@@ -151,7 +151,7 @@ namespace BWAPI
     UnitImpl *target = reinterpret_cast<UnitImpl*>(command.target);
 
     if (isCurrentFrame) {
-      switch (command.type) // Commands which do things during the current frame
+      switch ((UnitCommandType) command.type) // Commands which do things during the current frame
       {
       case UnitCommandTypes::Morph:       // Morph, Build_Addon and Train orders may reserve resources or supply that
       case UnitCommandTypes::Build_Addon: // SC does not take until the next frame to protect bots from overspending.
@@ -173,7 +173,7 @@ namespace BWAPI
       return;
 
     // Move test
-    switch (command.type)
+    switch ((UnitCommandType) command.type)
     {
     case UnitCommandTypes::Follow:
     case UnitCommandTypes::Hold_Position:
@@ -189,7 +189,7 @@ namespace BWAPI
     }
 
     // Apply command changes
-    switch(command.type)
+    switch((UnitCommandType) command.type)
     {
       // RLF
     case UnitCommandTypes::Attack_Move:

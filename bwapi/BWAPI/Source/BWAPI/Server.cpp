@@ -42,21 +42,34 @@ namespace BWAPI
     auto processID = getpid();
     if ( serverEnabled )
     {
-      gameTableFileHandle = shm_open("/bwapi_shared_memory_game_list", O_RDWR | O_CREAT, S_IRWXU);
+      bool createdGameTable = false;
+      gameTableFileHandle = shm_open("/bwapi_shared_memory_game_list", O_RDWR | O_CREAT | O_EXCL, S_IRWXU);
       if (gameTableFileHandle >= 0)
       {
+        createdGameTable = true;
+      }
+      else
+      {
+        gameTableFileHandle = shm_open("/bwapi_shared_memory_game_list", O_RDWR | O_CREAT, S_IRWXU);
+      }
+      if (gameTableFileHandle >= 0)
+      {
+        struct stat stat;
+        if (createdGameTable || (!fstat(gameTableFileHandle, &stat) && stat.st_size == 0))
+        {
+          if (!ftruncate(gameTableFileHandle, sizeof(GameTable)))
+            createdGameTable = true;
+        }
         gameTable = static_cast<GameTable *>(mmap(NULL, sizeof(GameTable), PROT_WRITE | PROT_READ, MAP_SHARED, gameTableFileHandle, 0));
+        if (gameTable == MAP_FAILED)
+          gameTable = nullptr;
         if (gameTable)
         {
-          struct stat stat;
-          if (!fstat(gameTableFileHandle, &stat) && stat.st_size == 0)
+          if (createdGameTable)
           {
-            if (!ftruncate(gameTableFileHandle, sizeof(GameTable)))
-            {
-              // If we created it, initialize it
-              for (int i = 0; i < GameTable::MAX_GAME_INSTANCES; ++i)
-                gameTable->gameInstances[i] = GameInstance_None;
-            } // If does not already exist
+            // If we created it, initialize it
+            for (int i = 0; i < GameTable::MAX_GAME_INSTANCES; ++i)
+              gameTable->gameInstances[i] = GameInstance_None;
           }
           // Check to see if we are already in the table
           for (int i = 0; i < GameTable::MAX_GAME_INSTANCES; ++i)
@@ -109,9 +122,14 @@ namespace BWAPI
       shareName = ssShareName.str();
 
       // Create the file mapping and shared memory
+      shm_unlink(shareName.c_str());
       mapFileHandle = shm_open(shareName.c_str(), O_RDWR | O_CREAT, S_IRWXU);
-      if (ftruncate(mapFileHandle, sizeof(GameData)) == 0 && mapFileHandle)
+      if (mapFileHandle >= 0 && ftruncate(mapFileHandle, sizeof(GameData)) == 0)
+      {
         data = static_cast<GameData *>(mmap(NULL, sizeof(GameData), PROT_WRITE | PROT_READ, MAP_SHARED, mapFileHandle, 0));
+        if (data == MAP_FAILED)
+          data = nullptr;
+      }
     } // if serverEnabled
 #endif
 
